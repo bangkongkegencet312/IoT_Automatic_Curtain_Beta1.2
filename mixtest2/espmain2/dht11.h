@@ -2,12 +2,11 @@
 #define DHT11_INPUT_H
 
 #include <DHT.h>
+#include <Arduino.h>
 
-// Ganti dengan pin yang kamu gunakan di ESP32
-#define DHTPIN 2         
-#define DHTTYPE DHT11    
+#define DHTPIN 2         // Pin digital untuk DHT11
+#define DHTTYPE DHT11
 
-// Membuat objek DHT
 extern DHT dht;
 
 void setupDHT();
