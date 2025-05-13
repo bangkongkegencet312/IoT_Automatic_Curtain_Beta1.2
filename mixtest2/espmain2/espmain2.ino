@@ -3,23 +3,16 @@
 #include <WiFiClientSecure.h>
 #include <ldr.h>
 #include <servoldr.h>
-#include <Arduino.h>
-#include "ldr.h"
-#include "dht11.h"
-#include "servoldr.h"
-
-
 
 // Ganti dengan WiFi kamu
 const char* ssid = "NEAREST";
 const char* password = "43211234";
 
 // Ganti dengan info HiveMQ Cloud kamu
-const char* mqtt_server = "9575f087603642b38802e20db41742bf.s1.eu.hivemq.cloud"; // HOST dari HiveMQ Cloud
+const char* mqtt_server = "9047b9234db74c92a7ee4d80b630fe62.s1.eu.hivemq.cloud"; // HOST dari HiveMQ Cloud
 const int mqtt_port = 8883; // Port TLS
-const char* mqtt_user = "Jawa_negri31"; // dari Access Management
-const char* mqtt_pass = "Aduhaijomok1";
-const char* mqtt_topic = "Tirai_PID_IOT"
+const char* mqtt_user = "Zero0"; // dari Access Management
+const char* mqtt_pass = "OneOne11";
 
 WiFiClientSecure wifiClient;
 PubSubClient client(wifiClient);
@@ -56,10 +49,9 @@ void setup() {
   Serial.begin(115200);
   setup_wifi();
 
-  wifiClient.setInsecure();
+  wifiClient.setInsecure(); // NON-production use! Untuk menghindari sertifikat SSL
   client.setServer(mqtt_server, mqtt_port);
   setupLDR();
-  setupDHT();
   setupServo();
 }
 
@@ -69,27 +61,24 @@ void loop() {
   }
   client.loop();
 
+  /*/ Kirim data counter setiap 5 detik
+  String data = String(counter++);
+  client.publish("esp32/uji", data.c_str());
+  Serial.print("Dikirim: ");
+  Serial.println(data);
+
+  delay(5000); // delay 5 detik
+  */
+
   int ldr = readLDR();
-  float suhu = readTemperature();
+  kontrolServo(ldr);
+  int PercLDR = round(100.0 - ((ldr / 1023.0) * 100.0));
+  String payload = String(PercLDR) + " %";
+  client.publish("esp32/ldr", payload.c_str());
 
-  if (suhu == -999.0) {
-    Serial.println("Gagal membaca suhu dari DHT11.");
-    delay(2000);
-    return;
-  }
+  Serial.print("LDR: ");
+  Serial.println(payload);
 
-  int intensitas = round(100.0 - ((ldr / 4095.0) * 100.0)); // 12-bit ADC ESP32
 
-  Serial.print("Suhu: ");
-  Serial.print(suhu);
-  Serial.print(" °C | Intensitas Cahaya: ");
-  Serial.print(intensitas);
-  Serial.println(" %");
-
-  kontrolServo(suhu, intensitas);
-
-  String payload = "Suhu: " + String(suhu) + " °C, Intensitas: " + String(intensitas) + " %";
-  client.publish("esp32/data", payload.c_str());
-
-  delay(2000);
+  delay(5000);
 }
