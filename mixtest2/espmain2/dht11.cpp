@@ -1,13 +1,12 @@
 #include "dht11.h"
+#include <Arduino.h>
 
 DHT dht(DHTPIN, DHTTYPE);
 
 void setupDHT() {
-  dht.begin();
+  dht.begin();  // Inisialisasi sensor DHT11
 }
 
 float readTemperature() {
-  float t = dht.readTemperature();
-  return isnan(t) ? -999.0 : t;
+  return dht.readTemperature();  // Langsung baca suhu
 }
-
